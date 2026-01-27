@@ -14,29 +14,30 @@ def TF(semi=None):
 
 
 def render(sr, duration, t0, params=None):
+    """FM pad (stereo) with slow drift. Transpose-aware."""
     params = params or {}
-    n = int(sr * duration)
+    sr = int(sr)
+    duration = float(duration)
+    t0 = float(t0)
+    n = max(1, int(round(sr * duration)))
+
     carrier = float(params.get("carrier_hz", 110.0)) * TF()
     ratio = float(params.get("ratio", 2.01))
     index = float(params.get("index", 3.5))
     drift = float(params.get("drift", 0.1))
 
-    outL = []
-    outR = []
+    outL = [0.0] * n
+    outR = [0.0] * n
     for i in range(n):
         t = i / sr
-        # slow evolving envelope
-        env = (1.0 - math.exp(-t*1.5)) * math.exp(-t*0.35)
+        env = (1.0 - math.exp(-t * 1.5)) * math.exp(-t * 0.35)
 
-        # slight time-dependent pitch drift tied to clip position
-        f = carrier * (1.0 + 0.02 * math.sin((t0+t) * drift * 2*math.pi))
-        mod = math.sin(2*math.pi*(f*ratio)*t)
-        s = math.sin(2*math.pi*f*t + index * mod)
+        f = carrier * (1.0 + 0.02 * math.sin((t0 + t) * drift * 2.0 * math.pi))
+        mod = math.sin(2.0 * math.pi * (f * ratio) * t)
 
-        # gentle stereo phase offset
-        sL = math.sin(2*math.pi*f*t + index*mod)
-        sR = math.sin(2*math.pi*f*(t + 0.0007) + index*mod)
+        sL = math.sin(2.0 * math.pi * f * t + index * mod)
+        sR = math.sin(2.0 * math.pi * f * (t + 0.0007) + index * mod)
 
-        outL.append(env * sL * 0.9)
-        outR.append(env * sR * 0.9)
+        outL[i] = env * sL * 0.9
+        outR[i] = env * sR * 0.9
     return outL, outR

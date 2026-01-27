@@ -1,4 +1,4 @@
-import random, math
+import math
 
 # --- transpose helper (semitones) ---
 def TF(semi=None):
@@ -13,22 +13,33 @@ def TF(semi=None):
     return 2.0 ** (s / 12.0)
 
 
+import random
+
 def render(sr, duration, t0, params=None):
+    """Wind-ish filtered noise with slow gusting. Returns stereo with subtle offset."""
     params = params or {}
-    n = int(sr * duration)
+    sr = int(sr)
+    duration = float(duration)
+    t0 = float(t0)
+    n = max(1, int(round(sr * duration)))
+
     seed = int(params.get("seed", 2))
     tilt = float(params.get("tilt", 0.98))  # 0.9..0.999; higher = more low freq
     amp = float(params.get("amp", 0.5))
-    random.seed(seed + int(t0*10))
+
+    random.seed(seed + int(t0 * 10))
 
     y = 0.0
-    out = []
+    out = [0.0] * n
     for i in range(n):
-        # one-pole lowpass noise = wind-ish
-        x = random.uniform(-1, 1)
-        y = tilt*y + (1-tilt)*x
-        # slow gust
-        t = i/sr
-        g = 0.5 + 0.5*math.sin(2*math.pi*(0.12 + 0.02*math.sin(t0*0.1))*t)
-        out.append(amp * g * y)
-    return out
+        x = random.uniform(-1.0, 1.0)
+        y = tilt * y + (1.0 - tilt) * x
+        t = i / sr
+        g = 0.5 + 0.5 * math.sin(2.0 * math.pi * (0.12 + 0.02 * math.sin(t0 * 0.1)) * t)
+        out[i] = amp * g * y
+
+    # subtle stereo decorrelation via a tiny delay
+    d = max(1, min(n - 1, int(sr * 0.0008))) if n > 1 else 0
+    L = out
+    R = out[:] if d == 0 else ([0.0] * d + out[:-d])
+    return L, R

@@ -14,22 +14,28 @@ def TF(semi=None):
 
 
 def render(sr, duration, t0, params=None):
+    """Short detuned sine bloop with clicky attack. Transpose-aware."""
     params = params or {}
-    n = int(sr * duration)
-    outL = []
-    outR = []
+    sr = int(sr)
+    duration = float(duration)
+    t0 = float(t0)
+    n = max(1, int(round(sr * duration)))
+
     base = float(params.get("base_hz", 220.0)) * TF()
     wob = float(params.get("wobble", 0.7))
     det = float(params.get("detune_hz", 0.8)) * TF()
-    f0 = base + 110.0 * math.sin(t0 * wob)  # context-aware by timeline position
 
+    # tie pitch subtly to timeline position
+    f0 = base + 110.0 * math.sin(t0 * wob)
+
+    outL = [0.0] * n
+    outR = [0.0] * n
     for i in range(n):
         t = i / sr
-        env = math.exp(-6.0*t) * (1.0 - math.exp(-90.0*t))
-        a = math.sin(2*math.pi*f0*t)
-        b = math.sin(2*math.pi*(f0+det)*t)
-        s = 0.6*a + 0.4*b
-        v = env * s
-        outL.append(v)
-        outR.append(v)
+        env = math.exp(-6.0 * t) * (1.0 - math.exp(-90.0 * t))
+        a = math.sin(2.0 * math.pi * f0 * t)
+        b = math.sin(2.0 * math.pi * (f0 + det) * t)
+        s = (0.6 * a + 0.4 * b) * env * 0.9
+        outL[i] = s
+        outR[i] = s
     return outL, outR

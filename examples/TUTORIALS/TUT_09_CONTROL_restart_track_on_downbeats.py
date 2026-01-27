@@ -44,3 +44,10 @@ def events(sr, duration, t0, params=None):
         k += 1
         t += spb
     return evs
+
+# Provide a silent render() so the engine that expects audio doesn't error.
+def render(sr, duration, t0, params=None):
+    sr = int(sr)
+    n = max(1, int(round(sr * max(0.001, float(duration)))))
+    z = [0.0] * n
+    return z, z
