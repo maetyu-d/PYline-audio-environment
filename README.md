@@ -1,4 +1,4 @@
-# PY Timeline
+# PYline
 Run with a local server (required for Worker + Pyodide):
 python3 -m http.server 8000
 Open http://localhost:8000
