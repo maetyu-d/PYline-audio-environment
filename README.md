@@ -1,4 +1,4 @@
-# PYline
+# PyLine
 
 ![](https://github.com/maetyu-d/PYline-audio-environment/blob/main/Screenshot%202026-02-01%20at%2021.33.56.png)
 
