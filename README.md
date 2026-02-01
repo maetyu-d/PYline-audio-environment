@@ -1,6 +1,6 @@
 # PYline
 
-[](https://github.com/maetyu-d/PYline-audio-environment/blob/main/Screenshot%202026-02-01%20at%2021.33.56.png)
+![](https://github.com/maetyu-d/PYline-audio-environment/blob/main/Screenshot%202026-02-01%20at%2021.33.56.png)
 
 Run with a local server (required for Worker + Pyodide):
 python3 -m http.server 8000
